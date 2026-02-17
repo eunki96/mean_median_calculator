@@ -272,11 +272,11 @@ function displayResult(percentile, userValue, stats, config) {
 
     // 비교 텍스트
     let tier = "";
-    if (percentile <= 1) tier = "신계 (Top 1%) 🏆";
-    else if (percentile <= 10) tier = "다이아몬드 (Top 10%) 💎";
-    else if (percentile <= 30) tier = "플래티넘 (상위권) ✨";
-    else if (percentile <= 60) tier = "골드 (평균 이상) 🥇";
-    else tier = "브론즈 (성장 가능성) 🌱";
+    if (percentile <= 1) tier = "신계 🏆";
+    else if (percentile <= 10) tier = "다이아몬드 💎";
+    else if (percentile <= 30) tier = "플래티넘 ✨";
+    else if (percentile <= 60) tier = "골드 🥇";
+    else tier = "브론즈 🌱";
 
     // 낮을수록 좋은 경우(스마트폰 등) 텍스트 반전 필요? 
     // 로직상 percentile 수치 자체를 "상위 N%"로 맞췄으므로 티어 이름은 유지 가능.
