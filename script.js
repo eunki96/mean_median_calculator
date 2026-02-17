@@ -413,13 +413,24 @@ function shareKakao() {
     const percentile = document.getElementById('percentileValue').innerText;
     const tierText = document.getElementById('comparisonText').innerText;
 
-    // 현재 측정 항목 이름 가져오기
+    // 현재 측정 항목 이름 및 값 가져오기
     let titleText = '대한민국 티어 측정기 결과 📊';
+
     if (currentType) {
         const card = document.querySelector(`.menu-card[data-type="${currentType}"]`);
         if (card) {
             const typeName = card.querySelector('h3').innerText;
-            titleText = `${typeName} 티어 측정 결과 📊`;
+
+            // 민감한 정보(돈) 제외하고 값 표시
+            const sensitiveTypes = ['income', 'networth', 'savings'];
+            if (!sensitiveTypes.includes(currentType)) {
+                // 예: "나의 키 175cm 티어는? 📊"
+                const userValText = document.getElementById('userValueDisplay').innerText;
+                titleText = `나의 ${typeName} ${userValText} 티어는? 📊`;
+            } else {
+                // 예: "나의 연 소득 티어는? 📊"
+                titleText = `나의 ${typeName} 티어는? 📊`;
+            }
         }
     }
 
@@ -427,7 +438,7 @@ function shareKakao() {
         objectType: 'feed',
         content: {
             title: titleText,
-            description: `나의 티어는: 상위 ${percentile}% (${tierText}) \n지금 바로 확인해보세요!`,
+            description: `상위 ${percentile}% (${tierText}) \n지금 바로 확인해보세요!`,
             imageUrl:
                 'https://mean-median-calculator.com/assets/icon.svg',
             link: {
