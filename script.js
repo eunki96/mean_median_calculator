@@ -5,7 +5,6 @@ const STAT_DB = {
         unit: "만원(세전)",
         isHighBetter: true,
         distribution: "log-normal",
-        // 연령대별 { mean: 평균, median: 중위, sd_log: 로그정규분포 표준편차(추정) }
         data: {
             20: { mean: 3200, median: 2800, sd_log: 0.5 },
             30: { mean: 5100, median: 4500, sd_log: 0.6 },
@@ -18,7 +17,6 @@ const STAT_DB = {
         unit: "만원",
         isHighBetter: true,
         distribution: "log-normal",
-        // 가계금융복지조사 2023 등 참조 (단위: 만원) - 추정치
         data: {
             20: { mean: 8000, median: 4000, sd_log: 1.0 },
             30: { mean: 25000, median: 15000, sd_log: 1.1 },
@@ -31,7 +29,6 @@ const STAT_DB = {
         unit: "만원",
         isHighBetter: true,
         distribution: "log-normal",
-        // 월 저축액 추정
         data: {
             20: { mean: 80, median: 50, sd_log: 0.8 },
             30: { mean: 150, median: 100, sd_log: 0.8 },
@@ -44,9 +41,7 @@ const STAT_DB = {
         unit: "cm",
         isHighBetter: true,
         distribution: "normal",
-        // 남성/여성 데이터 분리 필요
         hasGender: true,
-        // 사이즈코리아
         data: {
             male: {
                 20: { mean: 174.4, sd: 5.8 },
@@ -66,9 +61,8 @@ const STAT_DB = {
     },
     smartphone: {
         unit: "시간",
-        isHighBetter: false, // 낮을수록 상위
+        isHighBetter: false,
         distribution: "normal",
-        // 하루 평균 사용 시간
         data: {
             20: { mean: 5.5, sd: 2.0 },
             30: { mean: 4.5, sd: 1.8 },
@@ -79,9 +73,8 @@ const STAT_DB = {
     },
     reading: {
         unit: "권/년",
-        isHighBetter: true, // 높을수록 상위
-        distribution: "log-normal", // 편차가 큼
-        // 연간 독서량
+        isHighBetter: true,
+        distribution: "log-normal",
         data: {
             20: { mean: 5, median: 1, sd_log: 1.5 },
             30: { mean: 6, median: 2, sd_log: 1.5 },
@@ -91,12 +84,11 @@ const STAT_DB = {
         }
     },
     health: {
-        unit: "BMI", // 내부 계산용. 사용자 입력은 키/몸무게
+        unit: "BMI",
         isHighBetter: false,
         isCustomLogic: true,
         unitDisplay: "점",
         data: {
-            // 연령별 평균 BMI 및 표준편차 (국민건강영양조사)
             male: {
                 20: { mean: 24.0, sd: 3.5 },
                 30: { mean: 25.2, sd: 3.8 },
@@ -113,7 +105,7 @@ const STAT_DB = {
             }
         },
         hasGender: true,
-        extraInput: true // 키 입력 필요
+        extraInput: true
     },
     alcohol: {
         unit: "병",
@@ -152,6 +144,7 @@ const STAT_DB = {
 };
 
 let currentType = null;
+const KAKAO_API_KEY = "c89694200707436660144573887c264a";
 
 // UI Elements
 const menuSection = document.getElementById('menuSection');
@@ -160,9 +153,19 @@ const resultContainer = document.getElementById('result');
 const calcForm = document.getElementById('calcForm');
 const backButton = document.getElementById('backButton');
 const mainTitle = document.getElementById('mainTitle');
+const extraInputGroup = document.getElementById('extraInputGroup');
 
 // 초기화
 document.addEventListener('DOMContentLoaded', () => {
+    // Kakao Init
+    try {
+        if (typeof Kakao !== 'undefined' && !Kakao.isInitialized()) {
+            Kakao.init(KAKAO_API_KEY);
+        }
+    } catch (e) {
+        console.log("Kakao SDK not loaded or init failed");
+    }
+
     // 메뉴 카드 클릭 이벤트
     document.querySelectorAll('.menu-card').forEach(card => {
         card.addEventListener('click', () => {
@@ -191,11 +194,12 @@ document.addEventListener('DOMContentLoaded', () => {
 function openCalculator(type) {
     currentType = type;
     const config = STAT_DB[type];
+    const card = document.querySelector(`.menu-card[data-type="${type}"]`);
 
     // 타이틀 및 라벨 설정
-    document.getElementById('calcTitle').innerText = document.querySelector(`.menu-card[data-type="${type}"] h3`).innerText + " 측정";
-    document.getElementById('valueLabel').innerText = document.querySelector(`.menu-card[data-type="${type}"] h3`).innerText;
-    document.getElementById('valueUnit').innerText = config.unit;
+    document.getElementById('calcTitle').innerText = card.querySelector('h3').innerText + " 측정";
+    document.getElementById('valueLabel').innerText = (type === 'health') ? "몸무게" : card.querySelector('h3').innerText;
+    document.getElementById('valueUnit').innerText = (type === 'health') ? "kg" : config.unit;
 
     // 플레이스홀더 설정
     let placeholderMap = {
@@ -204,10 +208,14 @@ function openCalculator(type) {
         savings: "100",
         height: "173",
         smartphone: "4.5",
-        reading: "5"
+        reading: "5",
+        health: "70",
+        alcohol: "1.5",
+        sns: "150"
     };
     document.getElementById('valueInput').placeholder = placeholderMap[type] || "0";
-    document.getElementById('valueInput').value = ""; // 초기화
+    document.getElementById('valueInput').value = "";
+    if (document.getElementById('extraInput')) document.getElementById('extraInput').value = "";
 
     // 성별 필요 여부
     if (config.hasGender) {
@@ -216,21 +224,33 @@ function openCalculator(type) {
         document.getElementById('genderGroup').classList.add('hidden');
     }
 
+    // 추가 입력 필드 (예: 건강 계산기의 키 입력)
+    if (config.extraInput) {
+        extraInputGroup.classList.remove('hidden');
+        document.getElementById('extraLabel').innerText = "키";
+        document.getElementById('extraUnit').innerText = "cm";
+    } else {
+        extraInputGroup.classList.add('hidden');
+    }
+
     // 헬퍼 텍스트
     let helperMap = {
         income: "* 세전 연봉(영끌 포함) 기준",
         networth: "* 부동산, 주식, 현금 포함 - 부채",
         savings: "* 매월 주식/예적금 등에 넣는 금액",
         smartphone: "* 스크린타임 일평균 사용시간",
-        reading: "* 만화책 제외, 종이책/전자책 포함"
+        reading: "* 만화책 제외, 종이책/전자책 포함",
+        health: "* 키와 몸무게를 통해 BMI 및 건강 순위를 추정합니다.",
+        alcohol: "* 한 번 마실 때 소주 기준 몇 병?",
+        sns: "* 인스타그램, 유튜브 중 가장 많은 곳 기준"
     };
     document.getElementById('helperText').innerText = helperMap[type] || "";
 
     // 화면 전환
     menuSection.classList.add('hidden');
-    document.querySelector('.container header').classList.add('hidden'); // 헤더 숨겨서 공간 확보
+    document.querySelector('.container header').classList.add('hidden');
     calculatorSection.classList.remove('hidden');
-    resultContainer.classList.add('hidden'); // 결과창 초기화
+    resultContainer.classList.add('hidden');
 }
 
 function showMenu() {
@@ -255,8 +275,21 @@ function getStats(type, age, gender) {
 
 function calculateAndShowResult() {
     const age = parseInt(document.getElementById('age').value);
-    const value = parseFloat(document.getElementById('valueInput').value);
+    let value = parseFloat(document.getElementById('valueInput').value);
     const gender = document.querySelector('input[name="gender"]:checked').value;
+
+    // 건강(BMI) 모드일 경우: valueInput은 몸무게, extraInput은 키
+    if (currentType === 'health') {
+        const height = parseFloat(document.getElementById('extraInput').value);
+        const weight = value;
+        if (!height || !weight) {
+            alert("키와 몸무게를 모두 입력해주세요.");
+            return;
+        }
+        // BMI = weight / (height/100)^2
+        const bmi = weight / Math.pow(height / 100, 2);
+        value = bmi;
+    }
 
     if (!age || isNaN(value)) {
         alert("모든 값을 올바르게 입력해주세요.");
@@ -272,25 +305,26 @@ function calculateAndShowResult() {
     }
 
     let zScore = 0;
-    let percentile = 0; // 상위 % (0~100, 작을수록 상위)
+    let percentile = 0;
 
-    if (config.distribution === 'normal') {
+    if (config.isCustomLogic && currentType === 'health') {
+        // BMI: 22(표준)와의 차이 절대값
+        const diff = Math.abs(value - 22);
+        // 임의 로직: 차이가 0이면 상위 1%, 차이가 8점 이상이면 하위권
+        percentile = (diff / 8) * 100;
+        if (percentile < 1) percentile = 1;
+    }
+    else if (config.distribution === 'normal') {
         const sd = stats.sd;
         zScore = (value - stats.mean) / sd;
         const p = normalCDF(zScore);
-        percentile = (1 - p) * 100; // 상위 %
+        percentile = (1 - p) * 100;
     } else if (config.distribution === 'log-normal') {
-        // Log-normal: ln(X) ~ N(mu, sigma^2)
-        // stats.median is roughly exp(mu) -> mu = ln(median)
-        // We use stored sd_log as sigma
-        // z = (ln(x) - ln(median)) / sd_log
-
-        // Median data is available
         const mu = Math.log(stats.median);
         const sigma = stats.sd_log;
 
         if (value <= 0) {
-            percentile = 100; // 0 or negative income/assets -> bottom 
+            percentile = 100;
         } else {
             const lnVal = Math.log(value);
             zScore = (lnVal - mu) / sigma;
@@ -299,43 +333,29 @@ function calculateAndShowResult() {
         }
     }
 
-    // Invert percentile if "Lower is Better" (e.g. smartphone usage)
-    if (!config.isHighBetter) {
+    if (config.isHighBetter === false && !config.isCustomLogic) {
         percentile = 100 - percentile;
     }
 
-    // Clamp
     percentile = Math.max(0.1, Math.min(99.9, percentile));
 
-    // UI Update
     displayResult(percentile, value, stats, config);
 }
 
 function displayResult(percentile, userValue, stats, config) {
     const resultBox = document.getElementById('result');
     resultBox.classList.remove('hidden');
-
-    // 스크롤 이동
     resultBox.scrollIntoView({ behavior: 'smooth' });
 
-    // 숫자 애니메이션
     animateValue('percentileValue', 0, percentile.toFixed(1), 1000);
 
-    // 바 차트
     const barFill = document.getElementById('barFill');
     setTimeout(() => {
-        // 상위 N% -> 바의 길이는 (100 - N)% 가 되어야 "상위권(오른쪽)" 느낌을 줌
-        // 하지만 여기선 "상위 1%"가 꽉 찬 게 직관적인지, "상위 1%"면 왼쪽 끝인지?
-        // 디자인: "하위" --- "상위" 레이블.
-        // 상위 1% = 점수 매우 높음 = 오른쪽 끝.
-        // 따라서 길이는 (100 - percentile)% 가 적절.
         barFill.style.width = (100 - percentile) + "%";
     }, 100);
 
-    // 텍스트 매핑
     document.getElementById('resultMeta').innerText = `${Math.floor(document.getElementById('age').value / 10) * 10}대`;
 
-    // 비교 텍스트
     let tier = "";
     if (percentile <= 1) tier = "신계 🏆";
     else if (percentile <= 10) tier = "다이아몬드 💎";
@@ -343,25 +363,25 @@ function displayResult(percentile, userValue, stats, config) {
     else if (percentile <= 60) tier = "골드 🥇";
     else tier = "브론즈 🌱";
 
-    // 낮을수록 좋은 경우(스마트폰 등) 텍스트 반전 필요? 
-    // 로직상 percentile 수치 자체를 "상위 N%"로 맞췄으므로 티어 이름은 유지 가능.
-    // 다만 스마트폰 중독 "하위 90%"보다는 "상위 10%(사용량 적음)"이 낫다.
-
     document.getElementById('comparisonText').innerText = `당신은 ${tier} 등급입니다!`;
 
-    // 상세 수치
-    document.getElementById('userValueDisplay').innerText = `${userValue.toLocaleString()} ${config.unit}`;
+    let displayVal = userValue;
+    if (currentType === 'health') {
+        displayVal = userValue.toFixed(1);
+    } else {
+        displayVal = userValue.toLocaleString();
+    }
+    document.getElementById('userValueDisplay').innerText = `${displayVal} ${config.unit}`;
 
-    if (config.distribution === 'normal') {
+    if (config.distribution === 'normal' || config.isCustomLogic) {
         document.getElementById('averageDisplay').innerText = `${stats.mean.toLocaleString()} ${config.unit}`;
-        document.getElementById('medianDisplay').innerText = `-`; // 정규분포는 평균≒중위
+        document.getElementById('medianDisplay').innerText = `-`;
     } else {
         document.getElementById('averageDisplay').innerText = `${stats.mean.toLocaleString()} ${config.unit}`;
         document.getElementById('medianDisplay').innerText = `${stats.median.toLocaleString()} ${config.unit}`;
     }
 }
 
-// 표준정규분포 누적함수 (CDF) 근사식
 function normalCDF(x) {
     var t = 1 / (1 + .2316419 * Math.abs(x));
     var d = .3989423 * Math.exp(-x * x / 2);
@@ -382,4 +402,37 @@ function animateValue(id, start, end, duration) {
         }
     };
     window.requestAnimationFrame(step);
+}
+
+function shareKakao() {
+    if (typeof Kakao === 'undefined' || !Kakao.isInitialized()) {
+        alert("카카오톡 공유 기능을 불러오지 못했습니다. 잠시 후 다시 시도해주세요.");
+        return;
+    }
+
+    const percentile = document.getElementById('percentileValue').innerText;
+    const tierText = document.getElementById('comparisonText').innerText;
+
+    Kakao.Share.sendDefault({
+        objectType: 'feed',
+        content: {
+            title: '대한민국 티어 측정기 결과 📊',
+            description: `나의 티어는: 상위 ${percentile}% (${tierText}) \n지금 바로 확인해보세요!`,
+            imageUrl:
+                'https://eunki96.github.io/Mean_Median_Calculator/assets/og-image.png',
+            link: {
+                mobileWebUrl: 'https://www.mean-median-calculator.com',
+                webUrl: 'https://www.mean-median-calculator.com',
+            },
+        },
+        buttons: [
+            {
+                title: '결과 확인하기',
+                link: {
+                    mobileWebUrl: 'https://www.mean-median-calculator.com',
+                    webUrl: 'https://www.mean-median-calculator.com',
+                },
+            },
+        ],
+    });
 }
