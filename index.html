@@ -20,17 +20,22 @@
     <!-- SEO Meta Tags -->
     <meta name="description"
         content="나의 연봉, 자산, 키, 저축액은 대한민국 상위 몇 %일까? 통계청 및 공공 데이터를 기반으로 내 위치를 객관적으로 확인해보세요. 재미로 보는 현실 티어 측정기!">
-    <meta name="keywords" content="연봉 계산기, 연봉 순위, 소득 분위, 키 백분위, 순자산 순위, 대한민국 티어, 현실 등급표, 통계청 데이터">
+    <meta name="keywords"
+        content="연봉 계산기, 연봉 순위, 소득 분위, 키 백분위, 순자산 순위, 대한민국 티어, 현실 등급표, 통계청 데이터, 주량 측정, 인싸 테스트, BMI 계산기">
     <meta name="author" content="Eunki96">
     <link rel="canonical" href="https://www.mean-median-calculator.com">
 
     <!-- Open Graph (SNS 공유 시 미리보기) -->
     <meta property="og:type" content="website">
     <meta property="og:title" content="대한민국 티어 측정기 📊">
-    <meta property="og:description" content="내 연봉, 자산, 피지컬은 과연 몇 티어일까? 지금 바로 확인해보세요! (통계청 데이터 기반)">
+    <meta property="og:description" content="내 연봉, 자산, 피지컬, 주량은 과연 몇 티어일까? 지금 바로 확인해보세요! (통계청 데이터 기반)">
     <meta property="og:url" content="https://www.mean-median-calculator.com">
     <meta property="og:image" content="https://eunki96.github.io/Mean_Median_Calculator/assets/og-image.png">
-    <!-- 추후 이미지 추가 필요 -->
+
+    <!-- Kakao SDK -->
+    <script src="https://t1.kakaocdn.net/kakao_js_sdk/2.7.2/kakao.min.js"
+        integrity="sha384-TiCUE00h649CAMonG018J2ujOgDKW/kVWlChEuu4jK2txfDWp1s/nyr462JYkKd4"
+        crossorigin="anonymous"></script>
 
     <link rel="stylesheet" href="style.css">
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -80,7 +85,22 @@
                 <button class="menu-card" data-type="reading">
                     <div class="icon-box"><i class="fa-solid fa-book-open"></i></div>
                     <h3>독서량</h3>
-                    <p>연간 독서량(1년 기준)</p>
+                    <p>연간 독서량</p>
+                </button>
+                <button class="menu-card" data-type="health">
+                    <div class="icon-box"><i class="fa-solid fa-heart-pulse"></i></div>
+                    <h3>건강 (BMI)</h3>
+                    <p>신체 질량 지수</p>
+                </button>
+                <button class="menu-card" data-type="alcohol">
+                    <div class="icon-box"><i class="fa-solid fa-beer-mug-empty"></i></div>
+                    <h3>주량 (소주)</h3>
+                    <p>나의 음주 레벨</p>
+                </button>
+                <button class="menu-card" data-type="sns">
+                    <div class="icon-box"><i class="fa-brands fa-instagram"></i></div>
+                    <h3>SNS (팔로워)</h3>
+                    <p>인싸력 테스트</p>
                 </button>
             </section>
 
@@ -90,7 +110,7 @@
                 <h2 id="calcTitle">계산기 제목</h2>
 
                 <form id="calcForm">
-                    <!-- 공통 질문: 성별 (키 측정 등 일부 항목에 필요) -->
+                    <!-- 공통 질문: 성별 -->
                     <div id="genderGroup" class="input-group hidden">
                         <label>성별</label>
                         <div class="radio-wrapper">
@@ -108,6 +128,15 @@
                         <div class="input-wrapper">
                             <input type="number" id="age" placeholder="예: 32" required min="15" max="90">
                             <span class="unit">세</span>
+                        </div>
+                    </div>
+
+                    <!-- 추가 입력 (예: 키, BMI 계산용) -->
+                    <div id="extraInputGroup" class="input-group hidden">
+                        <label id="extraLabel" for="extraInput">추가 항목</label>
+                        <div class="input-wrapper">
+                            <input type="number" id="extraInput" placeholder="예: 175" step="any">
+                            <span class="unit" id="extraUnit">cm</span>
                         </div>
                     </div>
 
@@ -161,7 +190,13 @@
                         </div>
                     </div>
 
-                    <button id="resetBtn" class="reset-button">다른 항목 측정하기</button>
+                    <!-- 버튼 그룹: 공유 및 리셋 -->
+                    <div class="button-group">
+                        <button id="shareKakaoBtn" class="kakao-button" onclick="shareKakao()">
+                            <i class="fa-solid fa-comment"></i> 카카오톡 공유
+                        </button>
+                        <button id="resetBtn" class="reset-button">다른 항목 측정하기</button>
+                    </div>
                 </div>
             </div>
         </main>

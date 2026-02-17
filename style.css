@@ -360,7 +360,7 @@ h1 {
 }
 
 /* Result Actions */
-.btn-group {
+.button-group {
     display: flex;
     gap: 10px;
     margin-top: 15px;
@@ -384,7 +384,7 @@ h1 {
     border-color: #9ca3af;
 }
 
-.share-button {
+.kakao-button {
     flex: 1;
     background: #FFE812;
     /* Kakao Yellow */
@@ -402,7 +402,7 @@ h1 {
     font-size: 14px;
 }
 
-.share-button:hover {
+.kakao-button:hover {
     background-color: #f7e000;
 }
 
