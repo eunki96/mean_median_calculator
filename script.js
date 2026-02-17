@@ -108,6 +108,12 @@ document.addEventListener('DOMContentLoaded', () => {
     document.querySelectorAll('.menu-card').forEach(card => {
         card.addEventListener('click', () => {
             const type = card.dataset.type;
+            // Google Analytics 이벤트 전송
+            if (typeof gtag === 'function') {
+                gtag('event', 'select_calculator', {
+                    'calculator_type': type
+                });
+            }
             openCalculator(type);
         });
     });
