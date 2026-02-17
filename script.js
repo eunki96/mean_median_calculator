@@ -78,7 +78,7 @@ const STAT_DB = {
         }
     },
     reading: {
-        unit: "권",
+        unit: "권/년",
         isHighBetter: true, // 높을수록 상위
         distribution: "log-normal", // 편차가 큼
         // 연간 독서량
