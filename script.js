@@ -419,7 +419,7 @@ function shareKakao() {
             title: '대한민국 티어 측정기 결과 📊',
             description: `나의 티어는: 상위 ${percentile}% (${tierText}) \n지금 바로 확인해보세요!`,
             imageUrl:
-                'https://eunki96.github.io/Mean_Median_Calculator/assets/og-image.png',
+                'https://mean-median-calculator.com/assets/og-image.svg',
             link: {
                 mobileWebUrl: 'https://www.mean-median-calculator.com',
                 webUrl: 'https://www.mean-median-calculator.com',
