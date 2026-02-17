@@ -144,7 +144,7 @@ const STAT_DB = {
 };
 
 let currentType = null;
-const KAKAO_API_KEY = "c89694200707436660144573887c264a";
+const KAKAO_API_KEY = "e55ba6c59a5d9384958fae7a56b70e7b"; // Real Key
 
 // UI Elements
 const menuSection = document.getElementById('menuSection');
