@@ -89,6 +89,65 @@ const STAT_DB = {
             50: { mean: 6, median: 1, sd_log: 1.3 },
             60: { mean: 4, median: 0, sd_log: 1.2 }
         }
+    },
+    health: {
+        unit: "BMI", // 내부 계산용. 사용자 입력은 키/몸무게
+        isHighBetter: false,
+        isCustomLogic: true,
+        unitDisplay: "점",
+        data: {
+            // 연령별 평균 BMI 및 표준편차 (국민건강영양조사)
+            male: {
+                20: { mean: 24.0, sd: 3.5 },
+                30: { mean: 25.2, sd: 3.8 },
+                40: { mean: 25.5, sd: 3.6 },
+                50: { mean: 25.1, sd: 3.4 },
+                60: { mean: 24.8, sd: 3.3 }
+            },
+            female: {
+                20: { mean: 21.5, sd: 3.0 },
+                30: { mean: 22.2, sd: 3.2 },
+                40: { mean: 23.0, sd: 3.4 },
+                50: { mean: 24.0, sd: 3.5 },
+                60: { mean: 24.5, sd: 3.6 }
+            }
+        },
+        hasGender: true,
+        extraInput: true // 키 입력 필요
+    },
+    alcohol: {
+        unit: "병",
+        isHighBetter: true,
+        distribution: "log-normal",
+        data: {
+            male: {
+                20: { mean: 2.0, median: 1.5, sd_log: 0.6 },
+                30: { mean: 2.5, median: 2.0, sd_log: 0.5 },
+                40: { mean: 2.0, median: 1.5, sd_log: 0.6 },
+                50: { mean: 1.5, median: 1.0, sd_log: 0.7 },
+                60: { mean: 1.0, median: 0.8, sd_log: 0.8 }
+            },
+            female: {
+                20: { mean: 1.5, median: 1.0, sd_log: 0.6 },
+                30: { mean: 1.5, median: 1.0, sd_log: 0.6 },
+                40: { mean: 1.0, median: 0.8, sd_log: 0.7 },
+                50: { mean: 0.8, median: 0.5, sd_log: 0.8 },
+                60: { mean: 0.5, median: 0.3, sd_log: 0.9 }
+            }
+        },
+        hasGender: true
+    },
+    sns: {
+        unit: "명",
+        isHighBetter: true,
+        distribution: "log-normal",
+        data: {
+            20: { mean: 300, median: 180, sd_log: 1.2 },
+            30: { mean: 250, median: 150, sd_log: 1.3 },
+            40: { mean: 150, median: 80, sd_log: 1.4 },
+            50: { mean: 100, median: 50, sd_log: 1.5 },
+            60: { mean: 50, median: 20, sd_log: 1.5 }
+        }
     }
 };
 
