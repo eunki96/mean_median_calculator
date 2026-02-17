@@ -4,48 +4,104 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>내 연봉 순위 확인하기 (대한민국 통계 기반)</title>
+    <title>대한민국 수치 전투력 측정기</title>
     <link rel="stylesheet" href="style.css">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;500;700;900&display=swap"
         rel="stylesheet">
+    <!-- 아이콘 사용을 위한 Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 </head>
 
 <body>
     <div class="container">
         <header>
-            <div class="badge">2023 통계청 자료 기준</div>
-            <h1>내 연봉은<br>대한민국 상위 몇 %일까?</h1>
-            <p class="subtitle">나이와 연소득을 입력하고<br>객관적인 나의 위치를 확인해보세요.</p>
+            <div class="badge">2023-2024 통계 기준</div>
+            <h1 id="mainTitle">대한민국<br>티어 측정기</h1>
+            <p class="subtitle">나의 위치는 어디쯤일까?<br>궁금한 항목을 선택해보세요.</p>
         </header>
 
         <main>
-            <form id="calcForm">
-                <div class="input-group">
-                    <label for="age">나이 (만)</label>
-                    <div class="input-wrapper">
-                        <input type="number" id="age" placeholder="예: 32" required min="15" max="90">
-                        <span class="unit">세</span>
+            <!-- 1. 메인 메뉴 (그리드) -->
+            <section id="menuSection" class="menu-grid">
+                <button class="menu-card" data-type="income">
+                    <div class="icon-box"><i class="fa-solid fa-sack-dollar"></i></div>
+                    <h3>연 소득</h3>
+                    <p>직장인 연봉 순위</p>
+                </button>
+                <button class="menu-card" data-type="networth">
+                    <div class="icon-box"><i class="fa-solid fa-building-columns"></i></div>
+                    <h3>순자산</h3>
+                    <p>부채 제외 총 자산</p>
+                </button>
+                <button class="menu-card" data-type="height">
+                    <div class="icon-box"><i class="fa-solid fa-ruler-vertical"></i></div>
+                    <h3>키 (Height)</h3>
+                    <p>신장 백분위</p>
+                </button>
+                <button class="menu-card" data-type="savings">
+                    <div class="icon-box"><i class="fa-solid fa-piggy-bank"></i></div>
+                    <h3>월 저축액</h3>
+                    <p>저축 능력 평가</p>
+                </button>
+                <button class="menu-card" data-type="smartphone">
+                    <div class="icon-box"><i class="fa-solid fa-mobile-screen"></i></div>
+                    <h3>스마트폰 중독</h3>
+                    <p>스크린타임 진단</p>
+                </button>
+                <button class="menu-card" data-type="reading">
+                    <div class="icon-box"><i class="fa-solid fa-book-open"></i></div>
+                    <h3>독서량</h3>
+                    <p>마음의 양식 레벨</p>
+                </button>
+            </section>
+
+            <!-- 2. 계산기 입력 폼 (숨김 상태로 시작) -->
+            <section id="calculatorSection" class="hidden">
+                <button id="backButton" class="back-btn"><i class="fa-solid fa-arrow-left"></i> 뒤로가기</button>
+                <h2 id="calcTitle">계산기 제목</h2>
+
+                <form id="calcForm">
+                    <!-- 공통 질문: 성별 (키 측정 등 일부 항목에 필요) -->
+                    <div id="genderGroup" class="input-group hidden">
+                        <label>성별</label>
+                        <div class="radio-wrapper">
+                            <label class="radio-label">
+                                <input type="radio" name="gender" value="male" checked> <span>남성</span>
+                            </label>
+                            <label class="radio-label">
+                                <input type="radio" name="gender" value="female"> <span>여성</span>
+                            </label>
+                        </div>
                     </div>
-                </div>
 
-                <div class="input-group">
-                    <label for="income">연간 세전 소득</label>
-                    <div class="input-wrapper">
-                        <input type="text" id="income" placeholder="예: 5000" required inputmode="numeric">
-                        <span class="unit">만원</span>
+                    <div class="input-group">
+                        <label for="age">나이 (만)</label>
+                        <div class="input-wrapper">
+                            <input type="number" id="age" placeholder="예: 32" required min="15" max="90">
+                            <span class="unit">세</span>
+                        </div>
                     </div>
-                    <p class="helper-text">* 성과급, 보너스 등을 포함한 세전 총액을 입력해주세요.</p>
-                </div>
 
-                <button type="submit" class="cta-button">결과 확인하기</button>
-            </form>
+                    <div class="input-group">
+                        <label id="valueLabel" for="valueInput">입력값</label>
+                        <div class="input-wrapper">
+                            <input type="number" id="valueInput" placeholder="예: 5000" required step="any">
+                            <span class="unit" id="valueUnit">단위</span>
+                        </div>
+                        <p class="helper-text" id="helperText"></p>
+                    </div>
 
+                    <button type="submit" class="cta-button">결과 확인하기</button>
+                </form>
+            </section>
+
+            <!-- 3. 결과 화면 -->
             <div id="result" class="result-container hidden">
                 <div class="loader hidden"></div>
                 <div class="result-content">
-                    <p class="user-info"><span id="userAge">00</span>세 그룹 내에서</p>
+                    <p class="user-info"><span id="resultMeta">00세 그룹</span> 내에서</p>
                     <div class="percentile-box">
                         <span class="label">상위</span>
                         <span class="number" id="percentileValue">0</span>
@@ -57,36 +113,35 @@
                             <div class="bar-fill" id="barFill"></div>
                         </div>
                         <div class="chart-labels">
-                            <span>하위</span>
-                            <span>상위</span>
+                            <span id="lowLabel">하위</span>
+                            <span id="highLabel">상위</span>
                         </div>
                         <p class="comparison-text" id="comparisonText"></p>
                     </div>
 
                     <div class="detail-stat">
                         <div class="stat-row">
-                            <span>입력하신 연봉</span>
-                            <span class="value" id="userIncomeDisplay">0 만원</span>
+                            <span>나의 기록</span>
+                            <span class="value" id="userValueDisplay">-</span>
                         </div>
                         <div class="stat-row">
-                            <span>동년배 평균 연봉</span>
-                            <span class="value" id="averageIncomeDisplay">0 만원</span>
+                            <span>평균(Mean)</span>
+                            <span class="value" id="averageDisplay">-</span>
                         </div>
                         <div class="stat-row">
-                            <span>동년배 중위 연봉</span>
-                            <span class="value" id="medianIncomeDisplay">0 만원</span>
+                            <span>중위(Median)</span> <!-- 중위값 데이터가 없으면 표준편차 등으로 대체 가능 -->
+                            <span class="value" id="medianDisplay">-</span>
                         </div>
                     </div>
 
-                    <button id="resetBtn" class="reset-button">다시 하기</button>
+                    <button id="resetBtn" class="reset-button">다른 항목 측정하기</button>
                 </div>
             </div>
         </main>
 
         <footer>
-            <p>데이터 출처: 통계청 2023년 임금근로일자리 소득(보수) 결과, 국세청 근로소득 연말정산 자료</p>
-            <p class="disclaimer">본 서비스는 통계청의 연령별 평균/중위 소득 데이터를 기반으로 통계적 모델(로그정규분포)을 통해 추정한 결과입니다. 실제 개별 순위와는 차이가 있을 수
-                있습니다.</p>
+            <p>데이터 출처: 통계청, 사이즈코리아, 각 부처별 실태조사 자료 (2022~2024)</p>
+            <p class="disclaimer">본 서비스는 통계적 분포 모델을 기반으로 추정한 결과이며, 실제 순위와 다를 수 있습니다. 재미 용도로만 참고해주세요.</p>
         </footer>
     </div>
     <script src="script.js"></script>
