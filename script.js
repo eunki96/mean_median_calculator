@@ -10,7 +10,9 @@ const STAT_DB = {
             30: { mean: 5100, median: 4500, sd_log: 0.6 },
             40: { mean: 6800, median: 5800, sd_log: 0.7 },
             50: { mean: 7500, median: 6000, sd_log: 0.8 },
-            60: { mean: 5500, median: 4000, sd_log: 0.9 }
+            60: { mean: 5500, median: 4000, sd_log: 0.9 },
+            // 전체 연령
+            all: { mean: 5300, median: 4200, sd_log: 0.75 }
         }
     },
     networth: {
@@ -22,7 +24,9 @@ const STAT_DB = {
             30: { mean: 25000, median: 15000, sd_log: 1.1 },
             40: { mean: 45000, median: 30000, sd_log: 1.2 },
             50: { mean: 58000, median: 40000, sd_log: 1.2 },
-            60: { mean: 55000, median: 35000, sd_log: 1.3 }
+            60: { mean: 55000, median: 35000, sd_log: 1.3 },
+            // 전체 연령
+            all: { mean: 45000, median: 30000, sd_log: 1.2 }
         }
     },
     savings: {
@@ -434,10 +438,33 @@ function calculateAndShowResult() {
 
     percentile = Math.max(0.1, Math.min(99.9, percentile));
 
-    displayResult(percentile, value, stats, config);
+    // 전체 연령 통계 계산 (Income, Networth만 해당)
+    let allPercentile = null;
+    let allStats = null;
+
+    if (config.data && config.data.all) {
+        allStats = config.data.all;
+        let z = 0;
+        if (config.distribution === 'log-normal') {
+            const meanLog = Math.log(allStats.median);
+            z = (Math.log(value) - meanLog) / allStats.sd_log;
+        } else if (config.distribution === 'normal') {
+            z = (value - allStats.mean) / allStats.sd;
+        }
+
+        allPercentile = (1 - normalCDF(z)) * 100;
+
+        if (config.isHighBetter === false && !config.isCustomLogic) {
+            allPercentile = 100 - allPercentile;
+        }
+
+        allPercentile = Math.max(0.1, Math.min(99.9, allPercentile));
+    }
+
+    displayResult(percentile, value, stats, config, allPercentile, allStats);
 }
 
-function displayResult(percentile, userValue, stats, config) {
+function displayResult(percentile, userValue, stats, config, allPercentile = null, allStats = null) {
     const resultBox = document.getElementById('result');
     resultBox.classList.remove('hidden');
     resultBox.scrollIntoView({ behavior: 'smooth' });
@@ -453,7 +480,9 @@ function displayResult(percentile, userValue, stats, config) {
     if (config.ignoreAge) {
         metaText = "전체 연령";
     } else {
-        metaText = `${Math.floor(document.getElementById('age').value / 10) * 10}대`;
+        const ageVal = document.getElementById('age').value;
+        if (ageVal) metaText = `${Math.floor(ageVal / 10) * 10}대`;
+        else metaText = "전체 연령";
     }
     document.getElementById('resultMeta').innerText = metaText;
 
@@ -466,23 +495,77 @@ function displayResult(percentile, userValue, stats, config) {
     else tier = "브론즈 🌱";
 
     document.getElementById('comparisonText').innerText = `당신은 ${tier} 등급입니다!`;
+    document.getElementById('resultTier').innerText = tier;
 
-    let displayVal = userValue;
-    if (currentType === 'health') {
-        displayVal = userValue.toFixed(1);
-    } else {
-        displayVal = userValue.toLocaleString();
-    }
-    document.getElementById('userValueDisplay').innerText = `${displayVal} ${config.unit}`;
+    // 상세 통계 표시 (나의 기록, 평균, 중위)
+    const detailDiv = document.querySelector('.detail-stat');
+    const unit = config.unit || "";
 
-    if (config.distribution === 'normal' || config.isCustomLogic) {
-        document.getElementById('averageDisplay').innerText = `${stats.mean.toLocaleString()} ${config.unit}`;
-        // 정규분포는 평균=중위값으로 가정
-        document.getElementById('medianDisplay').innerText = `${stats.mean.toLocaleString()} ${config.unit}`;
+    // 전체 통계가 존재하면 비교 테이블 표시
+    if (allStats && allPercentile !== null) {
+        const myP = percentile.toFixed(1) + "%";
+        const allP = allPercentile.toFixed(1) + "%";
+
+        const myMean = Math.round(stats.mean).toLocaleString();
+        const allMean = Math.round(allStats.mean).toLocaleString();
+
+        const myMed = Math.round(stats.median || stats.mean).toLocaleString();
+        const allMed = Math.round(allStats.median || allStats.mean).toLocaleString();
+
+        detailDiv.innerHTML = `
+            <div class="comparison-container">
+                <div class="comp-header">
+                    <span>구분</span>
+                    <span>${metaText}</span>
+                    <span>전체 연령</span>
+                </div>
+                <div class="comp-row">
+                    <span class="label">상위</span>
+                    <span class="highlight">${myP}</span>
+                    <span class="val">${allP}</span>
+                </div>
+                <div class="comp-row">
+                    <span class="label">평균</span>
+                    <span class="val">${myMean} ${unit}</span>
+                    <span class="val">${allMean} ${unit}</span>
+                </div>
+                 <div class="comp-row">
+                    <span class="label">중위</span>
+                    <span class="val">${myMed} ${unit}</span>
+                    <span class="val">${allMed} ${unit}</span>
+                </div>
+                <div class="comp-row" style="margin-top:5px; border-top:1px dashed #e5e7eb;">
+                    <span class="label">나의 기록</span>
+                    <span class="val" style="grid-column: span 2; font-weight:bold; color:#4f46e5;">${userValue.toLocaleString()} ${unit}</span>
+                </div>
+            </div>
+        `;
     } else {
-        document.getElementById('averageDisplay').innerText = `${stats.mean.toLocaleString()} ${config.unit}`;
-        document.getElementById('medianDisplay').innerText = `${stats.median.toLocaleString()} ${config.unit}`;
+        let displayVal = userValue;
+        if (currentType === 'health') {
+            displayVal = userValue.toFixed(1);
+        } else {
+            displayVal = userValue.toLocaleString();
+        }
+
+        // 기존 방식 유지 (HTML 구조 복원)
+        detailDiv.innerHTML = `
+            <div class="stat-row">
+                <span>나의 기록</span>
+                <span class="value" id="userValueDisplay">${displayVal} ${unit}</span>
+            </div>
+            <div class="stat-row">
+                <span>평균(Mean)</span>
+                <span class="value" id="averageDisplay">${Math.round(stats.mean).toLocaleString()} ${unit}</span>
+            </div>
+            <div class="stat-row">
+                <span>중위(Median)</span>
+                <span class="value" id="medianDisplay">${Math.round(stats.median || stats.mean).toLocaleString()} ${unit}</span>
+            </div>
+        `;
     }
+
+
 
     // 추가 정보 표시 (Big3 비율 등)
     if (currentType === 'big3') {
