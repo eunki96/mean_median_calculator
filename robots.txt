@@ -1,0 +1,3 @@
+User-agent: *
+Allow: /
+Sitemap: https://www.mean-median-calculator.com/sitemap.xml
