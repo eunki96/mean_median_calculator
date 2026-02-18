@@ -29,80 +29,43 @@ const STAT_DB = {
         unit: "만원",
         isHighBetter: true,
         distribution: "log-normal",
-        data: {
-            20: { mean: 80, median: 50, sd_log: 0.8 },
-            30: { mean: 150, median: 100, sd_log: 0.8 },
-            40: { mean: 200, median: 120, sd_log: 0.9 },
-            50: { mean: 250, median: 100, sd_log: 1.0 },
-            60: { mean: 100, median: 50, sd_log: 1.2 }
-        }
+        ignoreAge: true,
+        data: { mean: 150, median: 90, sd_log: 1.0 }
     },
     height: {
         unit: "cm",
         isHighBetter: true,
         distribution: "normal",
         hasGender: true,
+        ignoreAge: true,
         data: {
-            male: {
-                20: { mean: 174.4, sd: 5.8 },
-                30: { mean: 174.9, sd: 5.9 },
-                40: { mean: 173.2, sd: 5.6 },
-                50: { mean: 170.8, sd: 5.5 },
-                60: { mean: 168.3, sd: 5.4 }
-            },
-            female: {
-                20: { mean: 161.8, sd: 5.2 },
-                30: { mean: 161.9, sd: 5.3 },
-                40: { mean: 160.2, sd: 5.1 },
-                50: { mean: 157.9, sd: 5.0 },
-                60: { mean: 155.4, sd: 4.9 }
-            }
+            male: { mean: 172.5, sd: 5.7 },
+            female: { mean: 159.6, sd: 5.2 }
         }
     },
     smartphone: {
         unit: "시간",
         isHighBetter: false,
         distribution: "normal",
-        data: {
-            20: { mean: 5.5, sd: 2.0 },
-            30: { mean: 4.5, sd: 1.8 },
-            40: { mean: 3.5, sd: 1.5 },
-            50: { mean: 3.0, sd: 1.5 },
-            60: { mean: 2.5, sd: 1.2 }
-        }
+        ignoreAge: true,
+        data: { mean: 3.8, sd: 1.8 }
     },
     reading: {
         unit: "권/년",
         isHighBetter: true,
         distribution: "log-normal",
-        data: {
-            20: { mean: 5, median: 1, sd_log: 1.5 },
-            30: { mean: 6, median: 2, sd_log: 1.5 },
-            40: { mean: 7, median: 2, sd_log: 1.4 },
-            50: { mean: 6, median: 1, sd_log: 1.3 },
-            60: { mean: 4, median: 0, sd_log: 1.2 }
-        }
+        ignoreAge: true,
+        data: { mean: 5.5, median: 1.5, sd_log: 1.4 }
     },
     health: {
         unit: "BMI",
         isHighBetter: false,
         isCustomLogic: true,
         unitDisplay: "점",
+        ignoreAge: true,
         data: {
-            male: {
-                20: { mean: 24.0, sd: 3.5 },
-                30: { mean: 25.2, sd: 3.8 },
-                40: { mean: 25.5, sd: 3.6 },
-                50: { mean: 25.1, sd: 3.4 },
-                60: { mean: 24.8, sd: 3.3 }
-            },
-            female: {
-                20: { mean: 21.5, sd: 3.0 },
-                30: { mean: 22.2, sd: 3.2 },
-                40: { mean: 23.0, sd: 3.4 },
-                50: { mean: 24.0, sd: 3.5 },
-                60: { mean: 24.5, sd: 3.6 }
-            }
+            male: { mean: 24.5, sd: 3.5 },
+            female: { mean: 23.0, sd: 3.4 }
         },
         hasGender: true,
         extraInput: true
@@ -111,21 +74,10 @@ const STAT_DB = {
         unit: "병",
         isHighBetter: true,
         distribution: "log-normal",
+        ignoreAge: true,
         data: {
-            male: {
-                20: { mean: 2.0, median: 1.5, sd_log: 0.6 },
-                30: { mean: 2.5, median: 2.0, sd_log: 0.5 },
-                40: { mean: 2.0, median: 1.5, sd_log: 0.6 },
-                50: { mean: 1.5, median: 1.0, sd_log: 0.7 },
-                60: { mean: 1.0, median: 0.8, sd_log: 0.8 }
-            },
-            female: {
-                20: { mean: 1.5, median: 1.0, sd_log: 0.6 },
-                30: { mean: 1.5, median: 1.0, sd_log: 0.6 },
-                40: { mean: 1.0, median: 0.8, sd_log: 0.7 },
-                50: { mean: 0.8, median: 0.5, sd_log: 0.8 },
-                60: { mean: 0.5, median: 0.3, sd_log: 0.9 }
-            }
+            male: { mean: 1.8, median: 1.5, sd_log: 0.7 },
+            female: { mean: 1.0, median: 0.8, sd_log: 0.8 }
         },
         hasGender: true
     },
@@ -133,13 +85,8 @@ const STAT_DB = {
         unit: "명",
         isHighBetter: true,
         distribution: "log-normal",
-        data: {
-            20: { mean: 300, median: 180, sd_log: 1.2 },
-            30: { mean: 250, median: 150, sd_log: 1.3 },
-            40: { mean: 150, median: 80, sd_log: 1.4 },
-            50: { mean: 100, median: 50, sd_log: 1.5 },
-            60: { mean: 50, median: 20, sd_log: 1.5 }
-        }
+        ignoreAge: true,
+        data: { mean: 170, median: 100, sd_log: 1.4 }
     },
     big3: {
         unit: "kg",
@@ -147,44 +94,22 @@ const STAT_DB = {
         distribution: "normal",
         hasGender: true,
         isSpecialInput: true,
+        ignoreAge: true,
         data: {
-            male: {
-                20: { mean: 260, sd: 70 },
-                30: { mean: 250, sd: 75 },
-                40: { mean: 230, sd: 70 },
-                50: { mean: 200, sd: 60 },
-                60: { mean: 160, sd: 50 }
-            },
-            female: {
-                20: { mean: 130, sd: 40 },
-                30: { mean: 125, sd: 35 },
-                40: { mean: 110, sd: 30 },
-                50: { mean: 90, sd: 25 },
-                60: { mean: 70, sd: 20 }
-            }
+            male: { mean: 220, sd: 70 },
+            female: { mean: 100, sd: 35 }
         }
     },
     running: {
         unit: "분/km",
         isHighBetter: false,
-        distribution: "log-normal", // 페이스는 로그노말에 가까움
+        distribution: "log-normal",
         hasGender: true,
         isSpecialInput: true,
+        ignoreAge: true,
         data: {
-            male: {
-                20: { mean: 6.5, median: 6.0, sd_log: 0.25 },
-                30: { mean: 6.8, median: 6.3, sd_log: 0.25 },
-                40: { mean: 7.0, median: 6.5, sd_log: 0.3 },
-                50: { mean: 7.5, median: 7.0, sd_log: 0.3 },
-                60: { mean: 8.0, median: 7.5, sd_log: 0.35 }
-            },
-            female: {
-                20: { mean: 7.5, median: 7.0, sd_log: 0.25 },
-                30: { mean: 7.8, median: 7.3, sd_log: 0.25 },
-                40: { mean: 8.0, median: 7.5, sd_log: 0.3 },
-                50: { mean: 8.5, median: 8.0, sd_log: 0.3 },
-                60: { mean: 9.0, median: 8.5, sd_log: 0.35 }
-            }
+            male: { mean: 7.0, median: 6.5, sd_log: 0.3 },
+            female: { mean: 8.0, median: 7.5, sd_log: 0.3 }
         }
     }
 };
@@ -270,6 +195,17 @@ function openCalculator(type) {
         document.getElementById('genderGroup').classList.add('hidden');
     }
 
+    // 나이 필드 제어 (ignoreAge가 true면 숨김)
+    const ageGroup = document.getElementById('age').closest('.input-group');
+    if (config.ignoreAge) {
+        ageGroup.classList.add('hidden');
+        document.getElementById('age').removeAttribute('required');
+    } else {
+        ageGroup.classList.remove('hidden');
+        document.getElementById('age').setAttribute('required', 'true');
+        document.getElementById('age').value = ""; // 초기화
+    }
+
     // 추가 입력 필드 (예: 건강 계산기의 키 입력)
     if (config.extraInput) {
         extraInputGroup.classList.remove('hidden');
@@ -335,8 +271,17 @@ function showMenu() {
 }
 
 // 통계 계산 로직
+// 통계 계산 로직
 function getStats(type, age, gender) {
     const config = STAT_DB[type];
+
+    if (config.ignoreAge) {
+        if (config.hasGender) {
+            return config.data[gender];
+        }
+        return config.data;
+    }
+
     const ageGroup = Math.floor(age / 10) * 10;
     const key = (ageGroup < 20) ? 20 : (ageGroup > 60) ? 60 : ageGroup;
 
@@ -390,8 +335,11 @@ function calculateAndShowResult() {
         value = totalMinutes / dist; // Pace in min/km
     } else {
         // 기존
-        if (!age || isNaN(value)) {
+        if (!STAT_DB[currentType].ignoreAge && (!age || isNaN(value))) {
             alert("모든 값을 올바르게 입력해주세요.");
+            return;
+        } else if (STAT_DB[currentType].ignoreAge && isNaN(value)) {
+            alert("값을 입력해주세요.");
             return;
         }
     }
@@ -460,7 +408,13 @@ function displayResult(percentile, userValue, stats, config) {
         barFill.style.width = (100 - percentile) + "%";
     }, 100);
 
-    document.getElementById('resultMeta').innerText = `${Math.floor(document.getElementById('age').value / 10) * 10}대`;
+    let metaText = "";
+    if (config.ignoreAge) {
+        metaText = "전체 연령";
+    } else {
+        metaText = `${Math.floor(document.getElementById('age').value / 10) * 10}대`;
+    }
+    document.getElementById('resultMeta').innerText = metaText;
 
     let tier = "";
     if (percentile <= 1) tier = "신계 🏆";
