@@ -495,7 +495,6 @@ function displayResult(percentile, userValue, stats, config, allPercentile = nul
     else tier = "브론즈 🌱";
 
     document.getElementById('comparisonText').innerText = `당신은 ${tier} 등급입니다!`;
-    document.getElementById('resultTier').innerText = tier;
 
     // 상세 통계 표시 (나의 기록, 평균, 중위)
     const detailDiv = document.querySelector('.detail-stat');
