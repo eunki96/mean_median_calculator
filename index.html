@@ -105,6 +105,16 @@
                     <h3>SNS (팔로워)</h3>
                     <p>인싸력 테스트</p>
                 </button>
+                <button class="menu-card" data-type="big3">
+                    <div class="icon-box"><i class="fa-solid fa-dumbbell"></i></div>
+                    <h3>3대 측정 (헬스)</h3>
+                    <p>3대 500 가능?</p>
+                </button>
+                <button class="menu-card" data-type="running">
+                    <div class="icon-box"><i class="fa-solid fa-person-running"></i></div>
+                    <h3>달리기 (페이스)</h3>
+                    <p>런닝 고인물 판독기</p>
+                </button>
             </section>
 
             <!-- 2. 계산기 입력 폼 (숨김 상태로 시작) -->
@@ -146,10 +156,67 @@
                     <div class="input-group">
                         <label id="valueLabel" for="valueInput">입력값</label>
                         <div class="input-wrapper">
-                            <input type="number" id="valueInput" placeholder="예: 5000" required step="any">
+                            <input type="number" id="valueInput" placeholder="예: 5000" step="any">
                             <span class="unit" id="valueUnit">단위</span>
                         </div>
                         <p class="helper-text" id="helperText"></p>
+                    </div>
+
+                    <!-- 3대 중량 전용 입력 -->
+                    <div id="big3InputGroup" class="hidden">
+                        <div class="input-group">
+                            <label>체중</label>
+                            <div class="input-wrapper">
+                                <input type="number" id="big3_bw" placeholder="예: 75" step="any">
+                                <span class="unit">kg</span>
+                            </div>
+                        </div>
+                        <div class="input-group">
+                            <label>벤치프레스 1RM</label>
+                            <div class="input-wrapper">
+                                <input type="number" id="big3_bench" placeholder="예: 80" step="any">
+                                <span class="unit">kg</span>
+                            </div>
+                        </div>
+                        <div class="input-group">
+                            <label>데드리프트 1RM</label>
+                            <div class="input-wrapper">
+                                <input type="number" id="big3_dead" placeholder="예: 120" step="any">
+                                <span class="unit">kg</span>
+                            </div>
+                        </div>
+                        <div class="input-group">
+                            <label>스쿼트 1RM</label>
+                            <div class="input-wrapper">
+                                <input type="number" id="big3_squat" placeholder="예: 100" step="any">
+                                <span class="unit">kg</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- 달리기 전용 입력 -->
+                    <div id="runningInputGroup" class="hidden">
+                        <div class="input-group">
+                            <label>달린 거리</label>
+                            <div class="input-wrapper">
+                                <input type="number" id="running_distance" placeholder="예: 5" step="any">
+                                <span class="unit">km</span>
+                            </div>
+                        </div>
+                        <div class="input-group">
+                            <label>소요 시간 (분)</label>
+                            <div class="input-wrapper">
+                                <input type="number" id="running_minutes" placeholder="예: 30" step="any">
+                                <span class="unit">분</span>
+                            </div>
+                        </div>
+                        <div class="input-group">
+                            <label>소요 시간 (초) - 선택사항</label>
+                            <div class="input-wrapper">
+                                <input type="number" id="running_seconds" placeholder="예: 0" step="any">
+                                <span class="unit">초</span>
+                            </div>
+                        </div>
                     </div>
 
                     <button type="submit" class="cta-button">결과 확인하기</button>

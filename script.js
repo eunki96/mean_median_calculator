@@ -140,6 +140,52 @@ const STAT_DB = {
             50: { mean: 100, median: 50, sd_log: 1.5 },
             60: { mean: 50, median: 20, sd_log: 1.5 }
         }
+    },
+    big3: {
+        unit: "kg",
+        isHighBetter: true,
+        distribution: "normal",
+        hasGender: true,
+        isSpecialInput: true,
+        data: {
+            male: {
+                20: { mean: 260, sd: 70 },
+                30: { mean: 250, sd: 75 },
+                40: { mean: 230, sd: 70 },
+                50: { mean: 200, sd: 60 },
+                60: { mean: 160, sd: 50 }
+            },
+            female: {
+                20: { mean: 130, sd: 40 },
+                30: { mean: 125, sd: 35 },
+                40: { mean: 110, sd: 30 },
+                50: { mean: 90, sd: 25 },
+                60: { mean: 70, sd: 20 }
+            }
+        }
+    },
+    running: {
+        unit: "분/km",
+        isHighBetter: false,
+        distribution: "log-normal", // 페이스는 로그노말에 가까움
+        hasGender: true,
+        isSpecialInput: true,
+        data: {
+            male: {
+                20: { mean: 6.5, median: 6.0, sd_log: 0.25 },
+                30: { mean: 6.8, median: 6.3, sd_log: 0.25 },
+                40: { mean: 7.0, median: 6.5, sd_log: 0.3 },
+                50: { mean: 7.5, median: 7.0, sd_log: 0.3 },
+                60: { mean: 8.0, median: 7.5, sd_log: 0.35 }
+            },
+            female: {
+                20: { mean: 7.5, median: 7.0, sd_log: 0.25 },
+                30: { mean: 7.8, median: 7.3, sd_log: 0.25 },
+                40: { mean: 8.0, median: 7.5, sd_log: 0.3 },
+                50: { mean: 8.5, median: 8.0, sd_log: 0.3 },
+                60: { mean: 9.0, median: 8.5, sd_log: 0.35 }
+            }
+        }
     }
 };
 
@@ -251,6 +297,33 @@ function openCalculator(type) {
     document.querySelector('.container header').classList.add('hidden');
     calculatorSection.classList.remove('hidden');
     resultContainer.classList.add('hidden');
+
+    // 입력 그룹 제어
+    const defaultGroup = document.getElementById('valueInput').closest('.input-group');
+    const big3Group = document.getElementById('big3InputGroup');
+    const runningGroup = document.getElementById('runningInputGroup');
+
+    // 리셋
+    defaultGroup.classList.remove('hidden');
+    big3Group.classList.add('hidden');
+    runningGroup.classList.add('hidden');
+
+    if (type === 'big3') {
+        defaultGroup.classList.add('hidden');
+        big3Group.classList.remove('hidden');
+        // big3 관련 필드 초기화
+        document.getElementById('big3_bw').value = "";
+        document.getElementById('big3_bench').value = "";
+        document.getElementById('big3_dead').value = "";
+        document.getElementById('big3_squat').value = "";
+    } else if (type === 'running') {
+        defaultGroup.classList.add('hidden');
+        runningGroup.classList.remove('hidden');
+        // running 관련 필드 초기화
+        document.getElementById('running_distance').value = "";
+        document.getElementById('running_minutes').value = "";
+        document.getElementById('running_seconds').value = "";
+    }
 }
 
 function showMenu() {
@@ -291,8 +364,41 @@ function calculateAndShowResult() {
         value = bmi;
     }
 
-    if (!age || isNaN(value)) {
-        alert("모든 값을 올바르게 입력해주세요.");
+    // Big3 및 Running 로직
+    if (currentType === 'big3') {
+        const bw = parseFloat(document.getElementById('big3_bw').value);
+        const bench = parseFloat(document.getElementById('big3_bench').value);
+        const dead = parseFloat(document.getElementById('big3_dead').value);
+        const squat = parseFloat(document.getElementById('big3_squat').value);
+
+        if (!bw || !bench || !dead || !squat) {
+            alert("모든 항목을 입력해주세요.");
+            return;
+        }
+        value = bench + dead + squat;
+    } else if (currentType === 'running') {
+        const dist = parseFloat(document.getElementById('running_distance').value);
+        const mins = parseFloat(document.getElementById('running_minutes').value);
+        const secs = parseFloat(document.getElementById('running_seconds').value) || 0;
+
+        if (!dist || (!mins && !secs)) {
+            alert("거리와 시간을 입력해주세요.");
+            return;
+        }
+        // 페이스 계산 (분/km)
+        const totalMinutes = mins + (secs / 60);
+        value = totalMinutes / dist; // Pace in min/km
+    } else {
+        // 기존
+        if (!age || isNaN(value)) {
+            alert("모든 값을 올바르게 입력해주세요.");
+            return;
+        }
+    }
+
+    // big3나 running은 위에서 value가 설정됨. 기존 로직의 isNaN 체크를 다시 수행 (Big3/Running은 0일수도 있으나 보통 >0)
+    if (value <= 0) {
+        alert("값은 0보다 커야 합니다.");
         return;
     }
 
@@ -375,10 +481,35 @@ function displayResult(percentile, userValue, stats, config) {
 
     if (config.distribution === 'normal' || config.isCustomLogic) {
         document.getElementById('averageDisplay').innerText = `${stats.mean.toLocaleString()} ${config.unit}`;
-        document.getElementById('medianDisplay').innerText = `-`;
+        // 정규분포는 평균=중위값으로 가정
+        document.getElementById('medianDisplay').innerText = `${stats.mean.toLocaleString()} ${config.unit}`;
     } else {
         document.getElementById('averageDisplay').innerText = `${stats.mean.toLocaleString()} ${config.unit}`;
         document.getElementById('medianDisplay').innerText = `${stats.median.toLocaleString()} ${config.unit}`;
+    }
+
+    // 추가 정보 표시 (Big3 비율 등)
+    if (currentType === 'big3') {
+        const bw = parseFloat(document.getElementById('big3_bw').value);
+        const ratio = userValue / bw;
+        document.getElementById('userValueDisplay').innerText += ` (체중 ${ratio.toFixed(1)}배)`;
+    } else if (currentType === 'running') {
+        // Pace를 분:초로 변환
+        const min = Math.floor(userValue);
+        const sec = Math.round((userValue - min) * 60);
+        const paceStr = `${min}'${sec.toString().padStart(2, '0')}"`;
+        document.getElementById('userValueDisplay').innerText = `${paceStr} /km`; // 덮어씌움
+
+        // 평균/중위도 포맷팅 필요할 수 있음
+        if (config.distribution === 'log-normal') {
+            const mMin = Math.floor(stats.mean);
+            const mSec = Math.round((stats.mean - mMin) * 60);
+            document.getElementById('averageDisplay').innerText = `${mMin}'${mSec.toString().padStart(2, '0')}" /km`;
+
+            const medMin = Math.floor(stats.median);
+            const medSec = Math.round((stats.median - medMin) * 60);
+            document.getElementById('medianDisplay').innerText = `${medMin}'${medSec.toString().padStart(2, '0')}" /km`;
+        }
     }
 }
 
