@@ -574,7 +574,7 @@ function shareKakao() {
         },
         buttons: [
             {
-                title: '결과 확인하기',
+                title: '나도 확인하기',
                 link: {
                     mobileWebUrl: 'https://www.mean-median-calculator.com',
                     webUrl: 'https://www.mean-median-calculator.com',
