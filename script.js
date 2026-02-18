@@ -458,10 +458,11 @@ function displayResult(percentile, userValue, stats, config) {
     document.getElementById('resultMeta').innerText = metaText;
 
     let tier = "";
-    if (percentile <= 1) tier = "신계 🏆";
-    else if (percentile <= 10) tier = "다이아몬드 💎";
-    else if (percentile <= 30) tier = "플래티넘 ✨";
-    else if (percentile <= 60) tier = "골드 🥇";
+    if (percentile <= 1) tier = "천상계 👑";
+    else if (percentile <= 5) tier = "다이아몬드 💎";
+    else if (percentile <= 15) tier = "플래티넘 ✨";
+    else if (percentile <= 30) tier = "골드 🥇";
+    else if (percentile <= 60) tier = "실버 🥈";
     else tier = "브론즈 🌱";
 
     document.getElementById('comparisonText').innerText = `당신은 ${tier} 등급입니다!`;
