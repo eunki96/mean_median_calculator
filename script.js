@@ -58,17 +58,17 @@ const STAT_DB = {
         data: { mean: 5.5, median: 1.5, sd_log: 1.4 }
     },
     health: {
-        unit: "BMI",
-        isHighBetter: false,
+        unit: "점",
+        isHighBetter: true,
         isCustomLogic: true,
-        unitDisplay: "점",
+        isSpecialInput: true,
         ignoreAge: true,
-        data: {
-            male: { mean: 24.5, sd: 3.5 },
-            female: { mean: 23.0, sd: 3.4 }
-        },
         hasGender: true,
-        extraInput: true
+        data: {
+            // 점수 분포 (Inbody 점수 기준)
+            male: { mean: 74, sd: 8 },
+            female: { mean: 74, sd: 8 }
+        }
     },
     alcohol: {
         unit: "병",
@@ -222,9 +222,11 @@ function openCalculator(type) {
         savings: "* 매월 주식/예적금 등에 넣는 금액",
         smartphone: "* 스크린타임 일평균 사용시간",
         reading: "* 만화책 제외, 종이책/전자책 포함",
-        health: "* 키와 몸무게를 통해 BMI 및 건강 순위를 추정합니다.",
+        health: "* 인바디 측정표에 있는 골격근량, 체지방률 입력",
         alcohol: "* 한 번 마실 때 소주 기준 몇 병?",
-        sns: "* 인스타그램, 유튜브 중 가장 많은 곳 기준"
+        sns: "* 인스타그램, 유튜브 중 가장 많은 곳 기준",
+        big3: "* 3대 운동 1RM 중량 합계 (스쿼트+벤치+데드)",
+        running: "* 달리기 기록 (km, 시간, 분)"
     };
     document.getElementById('helperText').innerText = helperMap[type] || "";
 
@@ -238,11 +240,13 @@ function openCalculator(type) {
     const defaultGroup = document.getElementById('valueInput').closest('.input-group');
     const big3Group = document.getElementById('big3InputGroup');
     const runningGroup = document.getElementById('runningInputGroup');
+    const inbodyGroup = document.getElementById('inbodyInputGroup');
 
-    // 리셋
+    // 모든 특수 그룹 숨기기 & 기본 그룹 보이기
     defaultGroup.classList.remove('hidden');
     big3Group.classList.add('hidden');
     runningGroup.classList.add('hidden');
+    inbodyGroup.classList.add('hidden');
 
     if (type === 'big3') {
         defaultGroup.classList.add('hidden');
@@ -259,6 +263,14 @@ function openCalculator(type) {
         document.getElementById('running_distance').value = "";
         document.getElementById('running_minutes').value = "";
         document.getElementById('running_seconds').value = "";
+    } else if (type === 'health') {
+        defaultGroup.classList.add('hidden');
+        inbodyGroup.classList.remove('hidden');
+        // inbody 초기화
+        document.getElementById('inbody_height').value = "";
+        document.getElementById('inbody_weight').value = "";
+        document.getElementById('inbody_muscle').value = "";
+        document.getElementById('inbody_fat').value = "";
     }
 }
 
@@ -286,6 +298,12 @@ function getStats(type, age, gender) {
     const key = (ageGroup < 20) ? 20 : (ageGroup > 60) ? 60 : ageGroup;
 
     if (config.hasGender) {
+        // health(인바디) 처럼 data가 바로 객체인 경우 (나이무관)
+        if (config.ignoreAge && !config.data[10] && !config.data[20]) {
+            // config.data가 { male: {mean...}, female: {mean...} } 형태
+            return config.data[gender];
+        }
+        // 기존 연령별 데이터
         return config.data[gender][key];
     }
     return config.data[key];
@@ -296,21 +314,42 @@ function calculateAndShowResult() {
     let value = parseFloat(document.getElementById('valueInput').value);
     const gender = document.querySelector('input[name="gender"]:checked').value;
 
-    // 건강(BMI) 모드일 경우: valueInput은 몸무게, extraInput은 키
+    // 건강(Inbody), Big3, Running 로직 분기
     if (currentType === 'health') {
-        const height = parseFloat(document.getElementById('extraInput').value);
-        const weight = value;
-        if (!height || !weight) {
-            alert("키와 몸무게를 모두 입력해주세요.");
+        const h = parseFloat(document.getElementById('inbody_height').value);
+        const w = parseFloat(document.getElementById('inbody_weight').value);
+        const m = parseFloat(document.getElementById('inbody_muscle').value); // SMM
+        const f = parseFloat(document.getElementById('inbody_fat').value); // PBF
+
+        if (!h || !w || !m || !f) {
+            alert("모든 인바디 정보를 입력해주세요.");
             return;
         }
-        // BMI = weight / (height/100)^2
-        const bmi = weight / Math.pow(height / 100, 2);
-        value = bmi;
-    }
 
-    // Big3 및 Running 로직
-    if (currentType === 'big3') {
+        // 인바디 점수 계산 로직
+        // 기준: 남성 SMM 42%, Fat 15% | 여성 SMM 36%, Fat 23%
+        const stdSMM = (gender === 'male') ? 42 : 36;
+        const stdFat = (gender === 'male') ? 15 : 23;
+
+        const mySMM = (m / w) * 100;
+
+        // 점수 공식: 기본 74 + (내골격근% - 표준%)*1.2 - (|내체지방% - 표준%|)*0.5 ... 너무 단순화하면 안됨.
+        // 인바디 공식 모방: 근육 많으면 +, 지방은 적정(표준)일때 0, 표준보다 많으면 -, 너무 적어도 약간 -?
+        // 단순화: 근육은 많을수록 좋음 (+), 지방은 표준 초과 시 감점 (-)
+
+        let score = 80 + (mySMM - stdSMM) * 1.5;
+
+        // 지방 감점 (표준보다 많을 때만 감점, 적으면 약간 가점 주거나 0)
+        if (f > stdFat) {
+            score -= (f - stdFat) * 1.0;
+        } else {
+            // 지방이 적으면 약간의 가점 (단, 너무 적으면 건강상 안좋으므로 캡)
+            score += (stdFat - f) * 0.5;
+        }
+
+        value = Math.round(score);
+        if (value > 100) value = 100; // 100점 만점
+    } else if (currentType === 'big3') {
         const bw = parseFloat(document.getElementById('big3_bw').value);
         const bench = parseFloat(document.getElementById('big3_bench').value);
         const dead = parseFloat(document.getElementById('big3_dead').value);
@@ -362,11 +401,13 @@ function calculateAndShowResult() {
     let percentile = 0;
 
     if (config.isCustomLogic && currentType === 'health') {
-        // BMI: 22(표준)와의 차이 절대값
-        const diff = Math.abs(value - 22);
-        // 임의 로직: 차이가 0이면 상위 1%, 차이가 8점 이상이면 하위권
-        percentile = (diff / 8) * 100;
-        if (percentile < 1) percentile = 1;
+        // Inbody Score (정규분포 가정)
+        // mean 74, sd 8
+        const mean = stats.mean;
+        const sd = stats.sd;
+        zScore = (value - mean) / sd;
+        const p = normalCDF(zScore);
+        percentile = (1 - p) * 100;
     }
     else if (config.distribution === 'normal') {
         const sd = stats.sd;

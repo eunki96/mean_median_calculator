@@ -92,8 +92,8 @@
                 </button>
                 <button class="menu-card" data-type="health">
                     <div class="icon-box"><i class="fa-solid fa-heart-pulse"></i></div>
-                    <h3>건강 (BMI)</h3>
-                    <p>신체 질량 지수</p>
+                    <h3>건강 (인바디)</h3>
+                    <p>인바디 점수 채점</p>
                 </button>
                 <button class="menu-card" data-type="alcohol">
                     <div class="icon-box"><i class="fa-solid fa-beer-mug-empty"></i></div>
@@ -160,6 +160,38 @@
                             <span class="unit" id="valueUnit">단위</span>
                         </div>
                         <p class="helper-text" id="helperText"></p>
+                    </div>
+
+                    <!-- 인바디 전용 입력 -->
+                    <div id="inbodyInputGroup" class="hidden">
+                        <div class="input-group">
+                            <label>키 (Height)</label>
+                            <div class="input-wrapper">
+                                <input type="number" id="inbody_height" placeholder="예: 175" step="any">
+                                <span class="unit">cm</span>
+                            </div>
+                        </div>
+                        <div class="input-group">
+                            <label>체중 (Weight)</label>
+                            <div class="input-wrapper">
+                                <input type="number" id="inbody_weight" placeholder="예: 70" step="any">
+                                <span class="unit">kg</span>
+                            </div>
+                        </div>
+                        <div class="input-group">
+                            <label>골격근량 (SMM)</label>
+                            <div class="input-wrapper">
+                                <input type="number" id="inbody_muscle" placeholder="예: 32" step="any">
+                                <span class="unit">kg</span>
+                            </div>
+                        </div>
+                        <div class="input-group">
+                            <label>체지방률 (PBF)</label>
+                            <div class="input-wrapper">
+                                <input type="number" id="inbody_fat" placeholder="예: 15" step="any">
+                                <span class="unit">%</span>
+                            </div>
+                        </div>
                     </div>
 
                     <!-- 3대 중량 전용 입력 -->
